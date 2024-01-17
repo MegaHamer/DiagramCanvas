@@ -25,7 +25,7 @@ const updInput = () => {
 class diagram {
     #ctx;
 
-    constructor(canvas, x, y) {
+    constructor(canvas, x, y, radius) {
         this.canvas = canvas;
         this.#ctx = canvas.getContext("2d");
         this.data = { 5: 0, 4: 0, 3: 0, 2: 0 };
@@ -33,7 +33,7 @@ class diagram {
             x: x,
             y: y
         };
-        this.
+        this.radius = radius;
     }
     #empty() {
         let result = true;
@@ -65,7 +65,7 @@ class diagram {
                 ContextDiagram.startPosY,
                 ContextDiagram.width * 1.2,
                 (ContextDiagram.count + 1 + (ContextDiagram.count - 1) * 0.2) * ContextDiagram.height)
-            this.#ctx.fillStyle = colors[i % (colors.length + 1)];
+            this.#ctx.fillStyle = colors[i + 2];
             this.#ctx.fillRect(
                 ContextDiagram.startPosX + ContextDiagram.width * 0.1,
                 ContextDiagram.startPosY + (ContextDiagram.height * 0.5 + i * ContextDiagram.height + i * ContextDiagram.height * 0.2),
@@ -84,17 +84,59 @@ class diagram {
             g++;
         }
     }
+    #drawAngle(startAngle, endAngle) {
+        this.#ctx.beginPath();
+        this.#ctx.moveTo(this.center.x, this.center.y);
+        this.#ctx.arc(this.center.x, this.center.y, this.radius, startAngle, endAngle, false);
+        this.#ctx.lineTo(this.center.x, this.center.y);
+        this.#ctx.stroke();
+    }
     draw() {
         this.#ctx.font = "4rem serif";
         this.#ctx.fillText("Успеваемость студентов", sizes.width / 2 - 300, 16 * 5);
 
-        const colors = ["purple", "green", "blue", "yellow"];
+        const colors = { 2: "purple", 3: "green", 4: "blue", 5: "yellow" };
         this.#drawLegend(colors);
 
         if (this.#empty()) {
             this.#ctx.beginPath();
-            this.#ctx.arc(this.center.x, this.center.y, Math.min(sizes.width, sizes.height) / 3, 2 * Math.PI, 0);
+            this.#ctx.arc(this.center.x, this.center.y, this.radius, 2 * Math.PI, 0);
             this.#ctx.stroke();
+        }
+        else {
+            let sum = 0;
+            let single = true;
+            for (const element in this.data) {
+                sum += this.data[element];
+                if (this.data[element] != sum && this.data[element] != 0) single = false;
+            };
+            console.log(single)
+            if (single) {
+                for (const element in this.data) {
+                    if (this.data[element] == sum) this.#ctx.fillStyle = colors[element];
+                }
+                this.#ctx.beginPath();
+                this.#ctx.arc(this.center.x, this.center.y, this.radius, 2 * Math.PI, 0);
+                this.#ctx.stroke();
+                this.#ctx.fill();
+                this.#ctx.fillStyle = "black";
+            }
+            else {
+                let start = 0;
+                for (const element in this.data) {
+                    const angle =  this.data[element] / sum * 2 * Math.PI;
+                    console.log(element,this.data[element],angle,start)
+                    this.#drawAngle(start,start + angle);
+                    this.#ctx.fillStyle = colors[element];
+                    this.#ctx.fill();
+                    this.#ctx.fillStyle = "black";
+                    start+=angle;
+                    // window.alert();
+                };
+            }
+
+
+            console.log(sum)
         }
     }
     clear() {
@@ -102,7 +144,7 @@ class diagram {
         ctx.strokeRect(0, 0, sizes.width, sizes.height);
     }
 }
-const diag = new diagram(canvas,sizes.width / 2,sizes.height / 2);
+const diag = new diagram(canvas, sizes.width / 2, sizes.height / 2, Math.min(sizes.width, sizes.height) / 3);
 diag.draw();
 
 const add = () => {
