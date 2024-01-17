@@ -11,7 +11,7 @@ const sizes = {
 //     sizes.height = canvas.height;
 //     console.log(sizes)
 // })
-ctx.lineWidth = 10;
+ctx.lineWidth = 4;
 ctx.strokeRect(0, 0, sizes.width, sizes.height - 2);
 
 const dataInputs = {
@@ -25,10 +25,15 @@ const updInput = () => {
 class diagram {
     #ctx;
 
-    constructor(canvas) {
+    constructor(canvas, x, y) {
         this.canvas = canvas;
         this.#ctx = canvas.getContext("2d");
         this.data = { 5: 0, 4: 0, 3: 0, 2: 0 };
+        this.center = {
+            x: x,
+            y: y
+        };
+        this.
     }
     #empty() {
         let result = true;
@@ -56,9 +61,9 @@ class diagram {
                 ContextDiagram.height
             )
             this.#ctx.strokeRect(
-                ContextDiagram.startPosX, 
-                ContextDiagram.startPosY, 
-                ContextDiagram.width * 1.2, 
+                ContextDiagram.startPosX,
+                ContextDiagram.startPosY,
+                ContextDiagram.width * 1.2,
                 (ContextDiagram.count + 1 + (ContextDiagram.count - 1) * 0.2) * ContextDiagram.height)
             this.#ctx.fillStyle = colors[i % (colors.length + 1)];
             this.#ctx.fillRect(
@@ -83,15 +88,12 @@ class diagram {
         this.#ctx.font = "4rem serif";
         this.#ctx.fillText("Успеваемость студентов", sizes.width / 2 - 300, 16 * 5);
 
-
-        
         const colors = ["purple", "green", "blue", "yellow"];
         this.#drawLegend(colors);
 
-
         if (this.#empty()) {
             this.#ctx.beginPath();
-            this.#ctx.arc(sizes.width / 2, sizes.height / 2, Math.min(sizes.width, sizes.height) / 3, 2 * Math.PI, 0);
+            this.#ctx.arc(this.center.x, this.center.y, Math.min(sizes.width, sizes.height) / 3, 2 * Math.PI, 0);
             this.#ctx.stroke();
         }
     }
@@ -100,7 +102,7 @@ class diagram {
         ctx.strokeRect(0, 0, sizes.width, sizes.height);
     }
 }
-const diag = new diagram(canvas);
+const diag = new diagram(canvas,sizes.width / 2,sizes.height / 2);
 diag.draw();
 
 const add = () => {
