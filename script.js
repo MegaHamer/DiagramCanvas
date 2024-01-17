@@ -144,7 +144,7 @@ class diagram {
         ctx.strokeRect(0, 0, sizes.width, sizes.height);
     }
 }
-const diag = new diagram(canvas, sizes.width / 2, sizes.height / 2, Math.min(sizes.width, sizes.height) / 3);
+const diag = new diagram(canvas, sizes.width / 2.5, sizes.height / 1.8, Math.min(sizes.width, sizes.height) / 3);
 diag.draw();
 
 const add = () => {
