@@ -28,7 +28,7 @@ class diagram {
     constructor(canvas, x, y, radius) {
         this.canvas = canvas;
         this.#ctx = canvas.getContext("2d");
-        this.data = { 5: 0, 4: 0, 3: 0, 2: 0 };
+        this.data = { };
         this.center = {
             x: x,
             y: y
@@ -48,15 +48,17 @@ class diagram {
             height: 50,
             count: Object.keys(this.data).length
         }
-        if (ContextDiagram.count < 1) ContextDiagram.count = 1;
+        //if (ContextDiagram.count <=0) return;
         ContextDiagram.startPosX = sizes.width - ContextDiagram.width * 1.4;
         ContextDiagram.startPosY = sizes.height - (ContextDiagram.count + 1.5 + (ContextDiagram.count - 1) * 0.2) * ContextDiagram.height;
 
         console.log(ContextDiagram);
-        for (let i = 0; i < ContextDiagram.count; i++) {
+        let g = 1;
+        for (const element in this.data) {
+            //if (this.data[element]<=0) {continue};
             this.#ctx.strokeRect(
                 ContextDiagram.startPosX + ContextDiagram.width * 0.1,
-                ContextDiagram.startPosY + (ContextDiagram.height * 0.5 + i * ContextDiagram.height + i * ContextDiagram.height * 0.2),
+                ContextDiagram.startPosY + (ContextDiagram.height * 0.5 + (g-1) * ContextDiagram.height + (g-1) * ContextDiagram.height * 0.2),
                 ContextDiagram.width * 0.66,
                 ContextDiagram.height
             )
@@ -65,16 +67,14 @@ class diagram {
                 ContextDiagram.startPosY,
                 ContextDiagram.width * 1.2,
                 (ContextDiagram.count + 1 + (ContextDiagram.count - 1) * 0.2) * ContextDiagram.height)
-            this.#ctx.fillStyle = colors[i + 2];
+            this.#ctx.fillStyle = colors[element];
             this.#ctx.fillRect(
                 ContextDiagram.startPosX + ContextDiagram.width * 0.1,
-                ContextDiagram.startPosY + (ContextDiagram.height * 0.5 + i * ContextDiagram.height + i * ContextDiagram.height * 0.2),
+                ContextDiagram.startPosY + (ContextDiagram.height * 0.5 + (g-1) * ContextDiagram.height + (g-1) * ContextDiagram.height * 0.2),
                 ContextDiagram.width * 0.66,
                 ContextDiagram.height
             )
-        }
-        let g = 1;
-        for (const element in this.data) {
+
             this.#ctx.fillStyle = "black";
             this.#ctx.fillText(
                 element,
@@ -90,6 +90,15 @@ class diagram {
         this.#ctx.arc(this.center.x, this.center.y, this.radius, startAngle, endAngle, false);
         this.#ctx.lineTo(this.center.x, this.center.y);
         this.#ctx.stroke();
+    }
+    #drawText(text,radius, startAngle, endAngle){
+        const cx = this.center.x, cy = this.center.y,
+        midleAngle = Math.abs(startAngle-endAngle)/2+startAngle,
+        newx = cx+Math.cos(midleAngle)*radius,
+        newy = cy +Math.sin(midleAngle)*radius;
+        console.log(startAngle,midleAngle,endAngle);
+        this.#ctx.font = "3rem serif";
+        this.#ctx.fillText(text,newx,newy);
     }
     draw() {
         this.#ctx.font = "4rem serif";
@@ -112,14 +121,16 @@ class diagram {
             };
             console.log(single)
             if (single) {
+                let el ;
                 for (const element in this.data) {
-                    if (this.data[element] == sum) this.#ctx.fillStyle = colors[element];
+                    if (this.data[element] == sum) {this.#ctx.fillStyle = colors[element];el = element};
                 }
                 this.#ctx.beginPath();
                 this.#ctx.arc(this.center.x, this.center.y, this.radius, 2 * Math.PI, 0);
                 this.#ctx.stroke();
                 this.#ctx.fill();
                 this.#ctx.fillStyle = "black";
+                this.#drawText(`${Math.round(this.data[el] / sum*100*100)/100}%(${this.data[el]})`,this.radius-10,-Math.PI/3,0);
             }
             else {
                 let start = 0;
@@ -130,6 +141,7 @@ class diagram {
                     this.#ctx.fillStyle = colors[element];
                     this.#ctx.fill();
                     this.#ctx.fillStyle = "black";
+                    this.#drawText(`${Math.round(this.data[element] / sum*100*100)/100}%(${this.data[element]})`,this.radius-10,start,start+angle);
                     start+=angle;
                     // window.alert();
                 };
@@ -155,6 +167,10 @@ const add = () => {
     else {
         diag.data[dataInputs.score] += Number(dataInputs.count)
     }
+    if (diag.data[dataInputs.score] <= 0) {
+        diag.data[dataInputs.score] = 0;
+        delete diag.data[dataInputs.score];
+    }
     diag.clear();
     diag.draw();
     console.log(diag);
@@ -164,17 +180,16 @@ const remove = () => {
     if (diag.data[dataInputs.score] != null) {
         diag.data[dataInputs.score] -= Number(dataInputs.count);
     }
-    if (diag.data[dataInputs.score] < 0) {
+    if (diag.data[dataInputs.score] <= 0) {
         diag.data[dataInputs.score] = 0;
+        delete diag.data[dataInputs.score];
     }
     diag.clear();
     diag.draw();
     console.log(diag);
 }
 const clearDiag = () => {
-    for (const element in diag.data) {
-        diag.data[element] = 0;
-    }
+    diag.data= {};
     diag.clear();
     diag.draw();
     console.log(diag);
